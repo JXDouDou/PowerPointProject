@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,8 +12,8 @@ namespace PowerPointProject
         const string RECTANGLE = "矩形";
         const string LINE = "線";
         const string CIRCLE = "圓形";
-        const int X_MAX = 704;
-        const int Y_MAX = 384;
+        const int X_MAX = 802;
+        const int Y_MAX = 408;
         Random _random = new Random();
 
         // 創建shape

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WindowsProject.View;
 
 namespace PowerPointProject
 {//PressedPointer的e.X,e.Y可以直接在裡面new Point(e.X, e.Y)
@@ -18,6 +19,8 @@ namespace PowerPointProject
         private const string POINTER_PROPERTY = "IsMouse";
         private const string CHECKED_PROPERTY = "Checked";
         private const int INDEX = 0;
+        private const int WIDTH = 16;
+        private const int HEIGHT = 9;
         private ModelOfDataGridView _model = new ModelOfDataGridView();
         PresentationModel _presentationModel;
 
@@ -32,30 +35,24 @@ namespace PowerPointProject
             _mouseButton.DataBindings.Add(CHECKED_PROPERTY, _presentationModel, POINTER_PROPERTY);
             _model._modelChanged += HandleModelChanged;
             _model._modelChanged += DoDataGridView;//更新dataGridView
+            _model._modelChanged += RefreshUi;
             _canvas.MouseDown += HandleCanvasPressed;
             _canvas.MouseUp += HandleCanvasReleased;
             _canvas.MouseMove += HandleCanvasMoved;
             _canvas.Paint += HandleCanvasPaint;
             _slide1.Paint += PaintSlide;
+            //_canvas.Width = _splitContainer2.Panel1.Width;
+            //_canvas.Height = _splitContainer2.Panel1.Width * HEIGHT / WIDTH;
+            _slide1.Width = _groupBox2.Width;
+            _slide1.Height = _groupBox2.Width * HEIGHT / WIDTH;
 
         }//view裡滑鼠的點擊放開以及移動都是用事件通知presentationModel
 
-        /*public void HandleCanvasPaint(object sender, PaintEventArgs e)
-        {
-            // graphics物件是Paint事件帶進來的，只能在當次Paint使用
-            // 而Adaptor又直接使用graphics，這樣DoubleBuffer才能正確運作
-            // 因此，Adaptor不能重複使用，每次都要重新new
-            _model.Draw(new PresentationModel.WindowsFormsGraphicsAdaptor(e.Graphics));
-        }*/
-        /*protected override void OnPaint(PaintEventArgs e)
-        {
-            //base.OnPaint(e);
-        }*/
         //處理滑鼠按下
         public void HandleCanvasPressed(object sender, System.Windows.Forms.MouseEventArgs e)//有文字的丟presentationModel
         {
             _presentationModel.PressedPointer(e.X, e.Y);//用presentationModel的bool去決定Model接收的shapeName就好
-        }
+        }//點的時候把panel初始化後16:9的size傳進去presentaion model做處理
 
         //處理滑鼠放開
         public void HandleCanvasReleased(object sender, System.Windows.Forms.MouseEventArgs e)
@@ -72,13 +69,21 @@ namespace PowerPointProject
         //處理畫面改變(繪圖模式)
         public void HandleCanvasPaint(object sender, System.Windows.Forms.PaintEventArgs e)
         {
+            _model.NowPanelWidth = _canvas.Width;
+            _model.NowPanelHeight = _canvas.Height;
             _presentationModel.Draw(e.Graphics);
+        }
+
+        //Refresh全部畫面
+        public void HandleAllRefresh()
+        {
+            _canvas.Invalidate();
         }
 
         //重畫
         public void HandleModelChanged()
         {
-            _canvas.Invalidate();
+            HandleAllRefresh();
         }
 
         //重畫
@@ -121,6 +126,8 @@ namespace PowerPointProject
         // draw on tiny panel
         void PaintSlide(object sender, PaintEventArgs e)
         {
+            _model.NowSlideWidth = _slide1.Width;
+            _model.NowSlideHeight = _slide1.Height;
             _presentationModel.DrawSlide(e.Graphics);
         }
 
@@ -139,8 +146,15 @@ namespace PowerPointProject
         //建立新shape
         private void CreateNewShape(object sender, EventArgs e)
         {
-            _model.CreateShapes(_comboBox1.Text);
-            DoDataGridView();
+            CoordinateForm dialog = new CoordinateForm();
+            DialogResult result = dialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                Point startPosition = new Point(dialog.GetStartPoint().X, dialog.GetStartPoint().Y);
+                Point endPosition = new Point(dialog.GetEndPoint().X, dialog.GetEndPoint().Y);
+                _model.CreateShapes(_comboBox1.SelectedItem.ToString(), startPosition, endPosition);
+            }
+            RefreshUi();
             //_recordShapes.DataSource = _model.GetModelGridView();           
         }
 
@@ -208,6 +222,44 @@ namespace PowerPointProject
         private void PressKey(object sender, KeyEventArgs e)
         {
             _presentationModel.PressDelete(e.KeyCode);
+        }
+
+        //右邊的界線被移到
+        private void MovedSpliter2(object sender, SplitterEventArgs e)
+        {
+            _canvas.Width = _splitContainer2.Panel1.Width;
+            _canvas.Height = _splitContainer2.Panel1.Width * HEIGHT / WIDTH;
+            _model.NotifyModelChanged();
+        }
+
+        //左邊的界線被移到
+        private void MovedSpliter1(object sender, SplitterEventArgs e)
+        {
+            _slide1.Width = _groupBox2.Width;
+            _slide1.Height = _groupBox2.Width * HEIGHT / WIDTH;
+            _model.NotifyModelChanged();
+        }
+
+        //redo clicked
+        private void IsRedoClick(object sender, EventArgs e)
+        {
+            _model.Redo();
+            RefreshUi();
+        }
+
+        //undo clicked
+        private void IsUndoClick(object sender, EventArgs e)
+        {
+            _model.Undo();
+            RefreshUi();
+        }
+
+        // 更新redo與undo是否為enabled
+        public void RefreshUi()
+        {
+            _redo.Enabled = _model.IsRedoEnabled;
+            _undo.Enabled = _model.IsUndoEnabled;
+            HandleAllRefresh();
         }
     }
 }

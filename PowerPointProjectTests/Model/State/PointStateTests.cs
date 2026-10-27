@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PowerPointProject;
 using PowerPointProjectTests.Model;
+using PowerPointProjectTests.Model.State;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,8 @@ namespace PowerPointProject.Tests
         MockRandom _mockRandom;
         ModelOfDataGridView _model;
         PointState _pointState;
+        PointState _pointState2;
+        MockModel _mockModel = new MockModel();
         const int X_MAX = 704;
         const int Y_MAX = 384;
         //produce random shape name
@@ -73,6 +76,8 @@ namespace PowerPointProject.Tests
         public void PressedPointerTest()
         {
             _pointState.PressedPointer("線", 300, 60);
+            _pointState2 = new PointState(_mockModel);
+            _pointState2.PressedPointer("圓形", 501, 66);
         }
 
         //test movedPointer
@@ -83,6 +88,9 @@ namespace PowerPointProject.Tests
             Point nowPoint = new Point(testPoints_0[0], testPoints_0[2]);
             _pointState._isPressed = true;
             _pointState.MovedPointer(nowPoint.X, nowPoint.Y);
+            _pointState2 = new PointState(_mockModel);
+            _pointState2.PressedPointer("圓形", 501, 66);
+            _pointState2.MovedPointer(501, 66);
         }
 
         //test releasedPointer

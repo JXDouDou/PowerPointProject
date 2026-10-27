@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using WindowsProject.Model;
+using WindowsProject.Model.Command;
 
 namespace PowerPointProject
 {
@@ -13,6 +15,7 @@ namespace PowerPointProject
         private Shape _shape;
         private Factory _factory;
         private List<Shape> _shapesNow;
+        private const int ONE = 1;
         private double _startXCoordinate;
         private double _startYCoordinate;
         private double _endXCoordinate;
@@ -34,6 +37,12 @@ namespace PowerPointProject
                 _shape = _factory.CreateShape(shape, startCoordinate, endCoordinate);
                 _shapesNow.Add(_shape);
             }
+        }
+
+        //remove last shape in shape list
+        public void RemoveLastShape()
+        {
+            _shapesNow.RemoveAt(_shapesNow.Count() - ONE);
         }
 
         //check Right Down is selected or not
@@ -80,9 +89,19 @@ namespace PowerPointProject
             for (; indexNow >= 0; indexNow--)
             {
                 if (_shapesNow[indexNow].IsSelected(nowPosition))
+                {
+                    _shapesNow[indexNow].Selected = true;
                     return indexNow;
+                }
             }
             return indexNow;
+        }
+
+        //Zoom selected shape
+        public void ZoomSelectedShape(int nowShape, double nowX, double nowY)
+        {
+            if (nowShape >= 0 && nowShape < _shapesNow.Count())
+                _shapesNow[nowShape].Zoom(nowX, nowY);
         }
 
         // move selected shape
@@ -90,6 +109,13 @@ namespace PowerPointProject
         {
             if (nowShape >= 0 && nowShape < _shapesNow.Count())
                 _shapesNow[nowShape].Move(diffX, diffY);
+        }
+
+        //reset point of zoom
+        public void ZoomCoordinateReset(int nowShape)
+        {
+            if (nowShape >= 0 && nowShape < _shapesNow.Count())
+                _shapesNow[nowShape].ResetCoordinate();
         }
 
         // draw shapes
@@ -120,10 +146,28 @@ namespace PowerPointProject
                 _shapesNow.RemoveAt(nowShapeSelected);
         }
 
+        //get shape object
+        public Shape GetShape(int nowShapeSelected)
+        {
+            return _shapesNow[nowShapeSelected];
+        }
+
         public Shapes()
         {
             _factory = new Factory();
             _shapesNow = new List<Shape>();
+        }
+
+        //add shape object
+        internal void AddShape(int pushIndex, Shape pushShape)
+        {
+            _shapesNow.Insert(pushIndex, pushShape);
+        }
+
+        //replace shape object
+        internal void ReplaceShape(int nowSelect, Shape targetShape)
+        {
+            _shapesNow[nowSelect] = targetShape;
         }
     }
 }

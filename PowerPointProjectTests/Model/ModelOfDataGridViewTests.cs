@@ -90,6 +90,16 @@ namespace PowerPointProject.Tests
             _model.ReleasedPointer(nowShapeName, releasedCoordinate.X, releasedCoordinate.Y);
         }
 
+        //test zooming process
+        [TestMethod()]
+        public void ShapeZoomingTest()
+        {
+            List<int> testPoints = _random.first_case(0, X_MAX, Y_MAX);
+            Point releasedCoordinate = new Point(testPoints[0], testPoints[2]);
+            string nowShapeName = randomShapeName();
+            _model.ShapeZooming(40, 80);
+        }
+
         //test ShapeMoving
         [TestMethod()]
         public void ShapeMovingTest()
@@ -114,7 +124,7 @@ namespace PowerPointProject.Tests
 
 
             Point nowCoordinate = new Point(123, 32);
-            _model._nowShapeSelected = 1;
+            _model.NowShapeSelected = 1;
             _model.ShapeMoving(nowCoordinate.X, nowCoordinate.Y);
         }
 
@@ -136,10 +146,12 @@ namespace PowerPointProject.Tests
         [TestMethod()]
         public void CreateShapesTest()
         {
-            _model.CreateShapes("線");
-            _model.CreateShapes("矩形");
-            _model.CreateShapes("圓形");
-            _model.CreateShapes("我不知道");
+            Point allTest_1 = new Point(100, 200);
+            Point allTest_2 = new Point(150, 250);
+            _model.CreateShapes("線", allTest_1, allTest_2);
+            _model.CreateShapes("矩形", allTest_1, allTest_2);
+            _model.CreateShapes("圓形", allTest_1, allTest_2);
+            _model.CreateShapes("我不知道", allTest_1, allTest_2);
         }
 
         //test Create Shapes by Mouse
@@ -206,7 +218,7 @@ namespace PowerPointProject.Tests
         public void MoveShapeTest()
         {
             Point nowPoint = new Point(43, 66);
-            _model.MoveShape(nowPoint.X, nowPoint.Y);
+            _model.MovedShape(nowPoint.X, nowPoint.Y);
         }
 
         //test getModelGridView
@@ -253,7 +265,7 @@ namespace PowerPointProject.Tests
             Random _testRandom = new Random();
             _model.DeleteShape(_testRandom.Next(0, 2));
 
-            _model._nowShapeSelected = 1;
+            _model.NowShapeSelected = 1;
             _model.PressDeleteKey();
         }
 

@@ -102,6 +102,35 @@ namespace PowerPointProject.Tests
             Assert.AreEqual(true, check);
         }
 
+        //test Zoom
+        [TestMethod()]
+        public void ZoomTest()
+        {
+            Point testStart = new Point(300, 100);
+            _Rectangle.SetStartCoordinate(testStart);
+            Point testEnd = new Point(450, 200);
+            _Rectangle.SetEndCoordinate(testEnd);
+            Point nowMouse = new Point(325, 123);
+            _Rectangle.Zoom(nowMouse.X, nowMouse.Y);
+            Assert.AreEqual(_Rectangle.EndXCoordinate, nowMouse.X);
+            Assert.AreEqual(_Rectangle.EndYCoordinate, nowMouse.Y);
+        }
+
+        //test Coordinate reset
+        [TestMethod()]
+        public void ResetCoordinateTest()
+        {
+            Point testStart = new Point(450, 200);
+            _Rectangle.SetStartCoordinate(testStart);
+            Point testEnd = new Point(300, 100);
+            _Rectangle.SetEndCoordinate(testEnd);
+            _Rectangle.ResetCoordinate();
+            Assert.AreEqual(_Rectangle.StartXCoordinate, 300);
+            Assert.AreEqual(_Rectangle.StartYCoordinate, 100);
+            Assert.AreEqual(_Rectangle.EndXCoordinate, 450);
+            Assert.AreEqual(_Rectangle.EndYCoordinate, 200);
+        }
+
         //test IsSelected Case
         [TestMethod()]
         public void IsSelectedTest_Case2()
@@ -142,6 +171,22 @@ namespace PowerPointProject.Tests
             Assert.AreEqual(_Rectangle.StartYCoordinate, 100 + 15);
             Assert.AreEqual(_Rectangle.EndXCoordinate, 450 + 20);
             Assert.AreEqual(_Rectangle.EndYCoordinate, 200 + 15);
+        }
+
+        //test Is Right Down or not
+        [TestMethod()]
+        public void IsRightDownSelectedTest()
+        {
+            Point testStart = new Point(300, 100);
+            _Rectangle.SetStartCoordinate(testStart);
+            Point testEnd = new Point(450, 200);
+            _Rectangle.SetEndCoordinate(testEnd);
+            Point nowMouse = new Point(455, 203);
+            bool check = _Rectangle.IsRightDownSelected(nowMouse);
+            Assert.AreEqual(true, check);
+            Point nowMouse2 = new Point(400, 299);
+            bool check2 = _Rectangle.IsRightDownSelected(nowMouse2);
+            Assert.AreEqual(false, check2);
         }
 
         //RectangleConstructor

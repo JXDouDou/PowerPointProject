@@ -49,23 +49,33 @@
     <Compile Include="Component1.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Model\Circle.cs" />
-    <Compile Include="Model\Direction\IDirection.cs" />
-    <Compile Include="Model\Direction\RightDown.cs" />
+    <Compile Include="Model\Shape\Circle.cs" />
+    <Compile Include="Model\Command\CommandManager.cs" />
+    <Compile Include="Model\Command\AddCommand.cs" />
+    <Compile Include="Model\Command\DeleteCommand.cs" />
+    <Compile Include="Model\Command\DrawCommand.cs" />
+    <Compile Include="Model\Command\MoveCommand.cs" />
     <Compile Include="Model\DriverManager.cs" />
     <Compile Include="Model\Factory.cs" />
+    <Compile Include="Model\Command\ICommand.cs" />
     <Compile Include="Model\IGraphic.cs" />
     <Compile Include="Model\IModel.cs" />
-    <Compile Include="Model\Line.cs" />
+    <Compile Include="Model\Shape\Line.cs" />
     <Compile Include="Model\ModelOfDataGridView.cs" />
     <Compile Include="Model\Point.cs" />
-    <Compile Include="Model\Rectangle.cs" />
-    <Compile Include="Model\Shape.cs" />
+    <Compile Include="Model\Shape\Rectangle.cs" />
+    <Compile Include="Model\Shape\Shape.cs" />
     <Compile Include="Model\ShapeGridViewModel.cs" />
     <Compile Include="Model\Shapes.cs" />
     <Compile Include="Model\State\DrawingState.cs" />
     <Compile Include="Model\State\IState.cs" />
     <Compile Include="Model\State\PointState.cs" />
+    <Compile Include="View\CoordinateForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\CoordinateForm.Designer.cs">
+      <DependentUpon>CoordinateForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="View\PresentationModel.cs" />
     <Compile Include="View\ToolStripBindingButton.cs">
       <SubType>Component</SubType>
@@ -91,6 +101,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -105,6 +116,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Picture\Undo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Picture\Redo.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

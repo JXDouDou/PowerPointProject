@@ -21,11 +21,12 @@ namespace PowerPointProject
             set;
         }
 
-        private Shapes _shapes = new Shapes();
+        private Shapes _shapes;
 
         public DrawingState(ModelOfDataGridView model)
         {
             this._model = model;
+            this._shapes = new Shapes();
         }
         // pressedMouse
         public void PressedPointer(string shapeName, double firstX, double firstY)

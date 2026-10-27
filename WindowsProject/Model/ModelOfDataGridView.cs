@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using WindowsProject.Model;
+using WindowsProject.Model.Command;
 
 namespace PowerPointProject
 {//只要被改了就用NotifyModelChanged()事件通知每個view以ModelChange()(此為事件)通知view去呼叫OnPaint再讓Model的Draw重新被called來實際畫圖
@@ -11,27 +13,72 @@ namespace PowerPointProject
     {
         public delegate void ModelChangedEventHandler();
         public event ModelChangedEventHandler _modelChanged;
-        const int SLIDE_WIDTH = 100;
-        const int SLIDE_HEIGHT = 57;
-
-        private const int PANEL_WIDTH = 941;
-        private const int PANEL_HEIGHT = 482;
+        private const int X_MAX_SLIDE = 201;
+        private const int Y_MAX_SLIDE = 120;
+        int _nowSlideWidth = X_MAX_SLIDE;
+        int _nowSlideHeight = Y_MAX_SLIDE;
+        int _nowShapeSelected = -1;
+        private const int X_MAX_PANEL = 788;
+        private const int Y_MAX_PANEL = 443;
+        private int _nowPanelWidth = X_MAX_PANEL;
+        private int _nowPanelHeight = Y_MAX_PANEL;
         private bool _rightDownCheck = false;
         const string RECTANGLE = "矩形";
         const string LINE = "線";
         const string CIRCLE = "圓形";
         const int OUT_OF_LIST = -1;
-        /*private double _startXCoordinate;
+        //Size _realPanelSize;
+        Factory _factory = new Factory();
+        CommandManager _commandManager = new CommandManager();
+        private double _startXCoordinate;
         private double _startYCoordinate;
         private double _endXCoordinate;
-        private double _endYCoordinate;*/
+        private double _endYCoordinate;
 
-        private Shapes _shapes = new Shapes();
+        private Shapes _shapes;
         //int _nowShapeSelected;
-        public int _nowShapeSelected
+        public int NowShapeSelected
         {
-            get;
-            set;
+            get
+            {
+                return _nowShapeSelected;
+            }
+            set
+            {
+                _nowShapeSelected = value;
+            }
+        }
+
+        public int NowPanelWidth
+        {
+            set
+            {
+                _nowPanelWidth = value;
+            }
+        }
+
+        public int NowPanelHeight
+        {
+            set
+            {
+                _nowPanelHeight = value;
+            }
+        }
+
+        public int NowSlideWidth
+        {
+            set
+            {
+                _nowSlideWidth = value;
+            }
+        }
+
+        public int NowSlideHeight
+        {
+            set
+            {
+                _nowSlideHeight = value;
+            }
         }
         //List<Shape> _shape = new List<Shape>();
 
@@ -75,10 +122,23 @@ namespace PowerPointProject
             NotifyModelChanged();
         }
 
+        //process zooming
+        public void ShapeZooming(double nowX, double nowY)
+        {
+            _shapes.ZoomSelectedShape(NowShapeSelected, nowX, nowY);
+        }
+
         //process shape moving
         public void ShapeMoving(double diffX, double diffY)
         {
-            _shapes.MoveSelectedShape(_nowShapeSelected, diffX, diffY);
+            _shapes.MoveSelectedShape(NowShapeSelected, diffX, diffY);
+            NotifyModelChanged();
+        }
+
+        //reset point of zoom
+        public void ZoomCoordinateReset()
+        {
+            _shapes.ZoomCoordinateReset(NowShapeSelected);
             NotifyModelChanged();
         }
 
@@ -101,19 +161,17 @@ namespace PowerPointProject
         public void DrawSlide(IGraphics graphics)
         {
             graphics.ClearAll();
-            _shapes.DrawSlide(graphics, new Size(PANEL_WIDTH, PANEL_HEIGHT), new Size(SLIDE_WIDTH, SLIDE_HEIGHT));
+            _shapes.DrawSlide(graphics, new Size(_nowPanelWidth, _nowPanelHeight), new Size(_nowSlideWidth, _nowSlideHeight));
         }
 
-        //create shape
-        public void CreateShapes(string shape)
+        //create shape by random coordinate
+        public void CreateShapes(string shape, Point startPosition, Point endPosition)
         {
             if (shape != RECTANGLE && shape != LINE && shape != CIRCLE)
             {
                 return;
             }
-            Point startCoordinate = new Point(-1, -1);
-            Point endCoordinate = new Point(-1, -1);
-            _shapes.CreateShape(shape, startCoordinate, endCoordinate, false);
+            _commandManager.Execute(new AddCommand(this, shape, startPosition, endPosition));
             NotifyModelChanged();
         }
 
@@ -124,16 +182,28 @@ namespace PowerPointProject
             {
                 return;
             }
-            _shapes.CreateShape(shape, startCoordinate, endCoordinate, true);
+            _commandManager.Execute(new DrawCommand(this, shape, startCoordinate, endCoordinate));
             NotifyModelChanged();
+        }
+
+        //方便command用的createShape
+        public void CallCreateShape(string shape, Point startCoordinate, Point endCoordinate)
+        {
+            _shapes.CreateShape(shape, startCoordinate, endCoordinate, true);
+        }
+
+        //刪除最後一個shape
+        public void DeleteLastShape()
+        {
+            _shapes.RemoveLastShape();
         }
 
         // check selected
         public bool CheckSelectedShape(double nowX, double nowY)
         {
-            _nowShapeSelected = _shapes.FindSelectedShape(nowX, nowY);
+            NowShapeSelected = _shapes.FindSelectedShape(nowX, nowY);
             //在這加呼叫測試哪個state的座標計算
-            if (_nowShapeSelected == OUT_OF_LIST)
+            if (NowShapeSelected == OUT_OF_LIST)
             {
                 return false;
             }
@@ -143,21 +213,31 @@ namespace PowerPointProject
         // check Corner selected
         public bool CheckAtRightDown(double nowX, double nowY)
         {
-            _rightDownCheck = _shapes.CheckAtRightDown(nowX, nowY, _nowShapeSelected);
-            return _rightDownCheck;
+            if (NowShapeSelected != OUT_OF_LIST)
+            {
+                _rightDownCheck = _shapes.CheckAtRightDown(nowX, nowY, NowShapeSelected);
+                return _rightDownCheck;
+            }
+            return false;
         }
 
         //draw selected shape
         public void DrawSelectedShape(IGraphics graphics)
         {
-            _shapes.DrawSelectedShape(graphics, _nowShapeSelected);
+            _shapes.DrawSelectedShape(graphics, NowShapeSelected);
         }
 
-        // move selected shape
-        public void MoveShape(double nowX, double nowY)
+        // move selected shape(其實我沒用到= =)
+        public void MovedShape(double nowX, double nowY)
         {
-            _shapes.MoveSelectedShape(_nowShapeSelected, nowX, nowY);
+            _shapes.MoveSelectedShape(NowShapeSelected, nowX, nowY);
             NotifyModelChanged();
+        }
+
+        // move command
+        public void MoveCommand(int selectedIndex, Shape originShape, Shape movedShape)
+        {
+            _commandManager.Execute(new MoveCommand(this, selectedIndex, originShape, movedShape));
         }
 
         //return data grid view content
@@ -169,16 +249,73 @@ namespace PowerPointProject
         //delete now_shape by dataGridView
         public void DeleteShape(int rowIndex)
         {
-            _shapes.DeleteShape(rowIndex);
+            Shapes nowShapes = GetShapes();
+            Shape deleteShape = nowShapes.GetShape(rowIndex);
+            _commandManager.Execute(new DeleteCommand(this, rowIndex, deleteShape));
             NotifyModelChanged();
+        }
+
+        //get selected shape for move command
+        public Shape GetSelectedShape(int selectedIndex)
+        {
+            Shapes shapes = GetShapes();
+            return shapes.GetShape(selectedIndex);
+        }
+
+        // get shapes
+        public Shapes GetShapes()
+        {
+            return _shapes;
+        }
+
+        //delete command的ReverseExecute
+        public void AddShape(int pushIndex, Shape pushShape)
+        {
+            _shapes.AddShape(pushIndex, pushShape);
         }
 
         // pressed delete key
         public void PressDeleteKey()
         {
-            _shapes.Remove(_nowShapeSelected);
-            _nowShapeSelected = OUT_OF_LIST;
+            _shapes.Remove(NowShapeSelected);
+            NowShapeSelected = OUT_OF_LIST;
             NotifyModelChanged();
+        }
+
+        //replace selected shape with new shpae
+        public void ReplaceShape(int nowSelect, Shape targetShape)
+        {
+            _shapes.ReplaceShape(nowSelect, targetShape);
+        }
+
+        //return is RedoCount !0 or not
+        public bool IsRedoEnabled
+        {
+            get
+            {
+                return _commandManager.IsRedoEnabled;
+            }
+        }
+
+        //return is UndoCount !0 or not
+        public bool IsUndoEnabled
+        {
+            get
+            {
+                return _commandManager.IsUndoEnabled;
+            }
+        }
+
+        //do undo
+        public void Undo()
+        {
+            _commandManager.Undo();
+        }
+
+        //do redo
+        public void Redo()
+        {
+            _commandManager.Redo();
         }
 
         //通知view Model改變了

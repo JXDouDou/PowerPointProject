@@ -165,6 +165,35 @@ namespace PowerPointProject.Tests
             Assert.AreEqual(-1, _shapes.FindSelectedShape(badMousePoint.X, badMousePoint.Y));
         }
 
+        //Zoom select test
+        [TestMethod()]
+        public void ZoomSelectedShapeTest_Case1()
+        {
+            List<int> testPoints_0 = _random.first_case(0, X_MAX, Y_MAX);
+            Point startCoordinate = new Point(testPoints_0[0], testPoints_0[2]);
+            Point endCoordinate = new Point(testPoints_0[1], testPoints_0[3]);
+            _shapes.CreateShape("線", startCoordinate, endCoordinate, true);
+
+
+            List<int> testPoints_1 = _random.first_case(0, X_MAX, Y_MAX);
+            startCoordinate = new Point(testPoints_1[0], testPoints_1[2]);
+            endCoordinate = new Point(testPoints_1[1], testPoints_1[3]);
+            _shapes.CreateShape("矩形", startCoordinate, endCoordinate, true);
+
+
+            List<int> testPoints_2 = _random.first_case(0, X_MAX, Y_MAX);
+            startCoordinate = new Point(100, 100);
+            endCoordinate = new Point(300, 200);
+            _shapes.CreateShape("圓形", startCoordinate, endCoordinate, true);
+
+
+            Assert.AreEqual(3, _shapes.GetShapeListInfo().Count);
+
+            _shapes.ZoomSelectedShape(2, 298, 198);
+            _shapes.ZoomSelectedShape(4, 30, 80);
+            _shapes.ZoomSelectedShape(-1, 30, 80);
+
+        }
 
         //nice case
         [TestMethod()]
@@ -228,6 +257,32 @@ namespace PowerPointProject.Tests
             _shapes.CreateShape("圓形", startCoordinate, endCoordinate, true);
 
             _shapes.DrawExist(_graphic);
+        }
+
+        //test DrawExistTest
+        [TestMethod()]
+        public void ZoomCoordinateResetTest()
+        {
+            List<int> testPoints_0 = _random.first_case(0, X_MAX, Y_MAX);
+            Point startCoordinate = new Point(testPoints_0[0], testPoints_0[2]);
+            Point endCoordinate = new Point(testPoints_0[1], testPoints_0[3]);
+            _shapes.CreateShape("線", startCoordinate, endCoordinate, true);
+
+
+            List<int> testPoints_1 = _random.first_case(0, X_MAX, Y_MAX);
+            startCoordinate = new Point(testPoints_1[0], testPoints_1[2]);
+            endCoordinate = new Point(testPoints_1[1], testPoints_1[3]);
+            _shapes.CreateShape("矩形", startCoordinate, endCoordinate, true);
+
+
+            List<int> testPoints_2 = _random.first_case(0, X_MAX, Y_MAX);
+            startCoordinate = new Point(testPoints_2[0], testPoints_2[2]);
+            endCoordinate = new Point(testPoints_2[1], testPoints_2[3]);
+            _shapes.CreateShape("圓形", startCoordinate, endCoordinate, true);
+
+            _shapes.ZoomCoordinateReset(2);
+            _shapes.ZoomCoordinateReset(-1);
+            _shapes.ZoomCoordinateReset(4);
         }
 
         //測試slide

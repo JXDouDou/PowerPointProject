@@ -128,6 +128,35 @@ namespace PowerPointProject.Tests
             Assert.AreEqual(false, check);
         }
 
+        //test Zoom
+        [TestMethod()]
+        public void ZoomTest()
+        {
+            Point testStart = new Point(300, 100);
+            _line.SetStartCoordinate(testStart);
+            Point testEnd = new Point(450, 200);
+            _line.SetEndCoordinate(testEnd);
+            Point nowMouse = new Point(325, 123);
+            _line.Zoom(nowMouse.X, nowMouse.Y);
+            Assert.AreEqual(_line.EndXCoordinate, nowMouse.X);
+            Assert.AreEqual(_line.EndYCoordinate, nowMouse.Y);
+        }
+
+        //test Coordinate reset
+        [TestMethod()]
+        public void ResetCoordinateTest()
+        {
+            Point testStart = new Point(450, 200);
+            _line.SetStartCoordinate(testStart);
+            Point testEnd = new Point(300, 100);
+            _line.SetEndCoordinate(testEnd);
+            _line.ResetCoordinate();
+            Assert.AreEqual(_line.StartXCoordinate, 300);
+            Assert.AreEqual(_line.StartYCoordinate, 100);
+            Assert.AreEqual(_line.EndXCoordinate, 450);
+            Assert.AreEqual(_line.EndYCoordinate, 200);
+        }
+
         //test how far we move
         [TestMethod()]
         public void MoveTest()
@@ -142,6 +171,25 @@ namespace PowerPointProject.Tests
             Assert.AreEqual(_line.StartYCoordinate, 100 + 15);
             Assert.AreEqual(_line.EndXCoordinate, 450 + 20);
             Assert.AreEqual(_line.EndYCoordinate, 200 + 15);
+        }
+
+        //test Is Right Down or not
+        [TestMethod()]
+        public void IsRightDownSelectedTest()
+        {
+            Point testStart = new Point(300, 100);
+            _line.SetStartCoordinate(testStart);
+            Point testEnd = new Point(450, 200);
+            _line.SetEndCoordinate(testEnd);
+            Point nowMouse = new Point(455, 203);
+            bool check = _line.IsRightDownSelected(nowMouse);
+            Assert.AreEqual(true, check);
+            Point nowMouse2 = new Point(477, 203);
+            bool check2 = _line.IsRightDownSelected(nowMouse2);
+            Assert.AreEqual(false, check2);
+            Point nowMouse3 = new Point(1, 2);
+            bool check3 = _line.IsRightDownSelected(nowMouse3);
+            Assert.AreEqual(false, check3);
         }
 
         //LineConstructor
